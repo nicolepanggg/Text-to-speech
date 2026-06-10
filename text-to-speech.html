@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech 文字轉語音</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .text-description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            font-weight: 500;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="text-description">使用 Web Speech API 將文字讀出</div>
+        
+        <div class="controls">
+            <button id="speak-btn" class="btn btn-primary">▶️ 開始播放</button>
+            <button id="stop-btn" class="btn btn-danger" disabled>⏹️ 停止</button>
+        </div>
+        
+        <div class="status" id="status">準備就緒</div>
+    </div>
+
+    <script>
+        // 檢查瀏覽器是否支援 Web Speech API
+        if (!('speechSynthesis' in window)) {
+            alert('❌ 您的瀏覽器不支援 Web Speech API');
+        }
+
+        // 取得 DOM 元素
+        const textDescription = document.querySelector('.text-description');
+        const speakBtn = document.getElementById('speak-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const status = document.getElementById('status');
+        
+        // 語音合成物件
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+
+        // 開始播放按鈕
+        speakBtn.addEventListener('click', () => {
+            // 取得 text-description 的內容
+            const text = textDescription.textContent.trim();
+            
+            if (!text) {
+                alert('沒有內容可以播放！');
+                return;
+            }
+            
+            // 停止當前播放（如果有的話）
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            // 建立新的 SpeechSynthesisUtterance
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            
+            // 取得可用的語音
+            const voices = synth.getVoices();
+            
+            // 選擇 Google 粵語（香港）語音
+            const googleCantoneseVoice = voices.find(voice => 
+                voice.name.toLowerCase().includes('google') && 
+                voice.lang === 'zh-HK'
+            );
+            
+            if (googleCantoneseVoice) {
+                currentUtterance.voice = googleCantoneseVoice;
+                console.log('🎙️ 使用語音:', googleCantoneseVoice.name, '- 粵語（香港）');
+            } else {
+                console.warn('⚠️ 找不到 Google 粵語（香港）語音，使用預設語音');
+                // 列出所有可用的語音供參考
+                console.log('可用語音:', voices.map(v => `${v.name} (${v.lang})`));
+            }
+            
+            // 設定參數
+            currentUtterance.rate = 1;      // 語速
+            currentUtterance.pitch = 1;     // 音調
+            currentUtterance.volume = 1;    // 音量
+            
+            // 事件監聽器
+            currentUtterance.onstart = () => {
+                console.log('🎤 開始播放');
+                status.textContent = '🎤 正在播放...';
+                speakBtn.disabled = true;
+                stopBtn.disabled = false;
+            };
+            
+            currentUtterance.onend = () => {
+                console.log('✅ 播放結束');
+                status.textContent = '✅ 播放完成';
+                speakBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+            
+            currentUtterance.onerror = (event) => {
+                console.error('❌ 發生錯誤:', event.error);
+                status.textContent = `❌ 錯誤: ${event.error}`;
+                speakBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+            
+            // 開始播放
+            synth.speak(currentUtterance);
+        });
+
+        // 停止播放按鈕
+        stopBtn.addEventListener('click', () => {
+            if (synth.speaking) {
+                synth.cancel();
+                status.textContent = '⏹️ 已停止';
+                speakBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        });
+
+        // 載入語音（某些瀏覽器需要時間載入）
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = () => {
+                const voices = synth.getVoices();
+                console.log('📝 可用語音數量:', voices.length);
+            };
+        }
+
+        console.log('🚀 Text-to-Speech 已載入');
+    </script>
+</body>
+</html>
