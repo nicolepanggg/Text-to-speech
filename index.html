@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text to Speech</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Text to Speech</h1>
+
+      <div class="card">
+        <label for="text-input">Enter text</label>
+        <textarea
+          id="text-input"
+          placeholder="Type or paste text here..."
+          rows="6"
+        ></textarea>
+
+        <div class="controls">
+          <div class="control-group">
+            <label for="voice-select">Voice</label>
+            <select id="voice-select"></select>
+          </div>
+
+          <div class="control-group">
+            <label for="rate">
+              Rate: <span id="rate-value">1</span>
+            </label>
+            <input
+              type="range"
+              id="rate"
+              min="0.5"
+              max="2"
+              step="0.1"
+              value="1"
+            />
+          </div>
+
+          <div class="control-group">
+            <label for="pitch">
+              Pitch: <span id="pitch-value">1</span>
+            </label>
+            <input
+              type="range"
+              id="pitch"
+              min="0"
+              max="2"
+              step="0.1"
+              value="1"
+            />
+          </div>
+
+          <div class="control-group">
+            <label for="volume">
+              Volume: <span id="volume-value">1</span>
+            </label>
+            <input
+              type="range"
+              id="volume"
+              min="0"
+              max="1"
+              step="0.1"
+              value="1"
+            />
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="speak-btn" class="btn btn-primary">&#9654; Speak</button>
+          <button id="pause-btn" class="btn btn-secondary" disabled>
+            &#9646;&#9646; Pause
+          </button>
+          <button id="resume-btn" class="btn btn-secondary" disabled>
+            &#9654;&#9654; Resume
+          </button>
+          <button id="stop-btn" class="btn btn-danger" disabled>
+            &#9632; Stop
+          </button>
+        </div>
+
+        <div id="status" class="status"></div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
