@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text-to-Speech 文字轉語音</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Text-to-Speech 文字轉語音</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
         .container {
             max-width: 800px;
             margin: 50px auto;
@@ -75,21 +75,22 @@
             color: #666;
         }
     </style>
-</head>
+    </head>
 
-<body>
-    <div class="container">
-        <div class="text-description">使用 Web Speech API 將文字讀出</div>
-        
-        <div class="controls">
-            <button id="speak-btn" class="btn btn-primary">▶️ 開始播放</button>
-            <button id="stop-btn" class="btn btn-danger" disabled>⏹️ 停止</button>
+    <body>
+        <div class="container">
+            <div class="text-description">使用 Web Speech API 將文字讀出</div>
+
+            <div class="controls">
+                <button id="speak-btn" class="btn btn-primary">▶️ 開始播放</button>
+                <button id="stop-btn" class="btn btn-danger" disabled>⏹️
+                    停止</button>
+            </div>
+
+            <div class="status" id="status">準備就緒</div>
         </div>
-        
-        <div class="status" id="status">準備就緒</div>
-    </div>
 
-    <script>
+        <script>
         // 檢查瀏覽器是否支援 Web Speech API
         if (!('speechSynthesis' in window)) {
             alert('❌ 您的瀏覽器不支援 Web Speech API');
@@ -131,15 +132,24 @@
                 voice.name.toLowerCase().includes('google') && 
                 voice.lang === 'zh-HK'
             );
+
+            const microsoftTracyVoice = voices.find(voice =>
+                voice.name.includes('Microsoft Tracy') &&
+                voice.lang === 'zh-HK'
+            );
             
             if (googleCantoneseVoice) {
                 currentUtterance.voice = googleCantoneseVoice;
                 console.log('🎙️ 使用語音:', googleCantoneseVoice.name, '- 粵語（香港）');
+            } else if (microsoftTracyVoice) {
+                currentUtterance.voice = microsoftTracyVoice;
+                console.log('🎙️ 使用語音:', microsoftTracyVoice.name, '- 粵語（香港）');
             } else {
-                console.warn('⚠️ 找不到 Google 粵語（香港）語音，使用預設語音');
+                console.warn('⚠️ 找不到 Google 或 Microsoft Tracy 粵語（香港）語音，使用預設語音');
                 // 列出所有可用的語音供參考
                 console.log('可用語音:', voices.map(v => `${v.name} (${v.lang})`));
             }
+            
             
             // 設定參數
             currentUtterance.rate = 1;      // 語速
@@ -192,5 +202,5 @@
 
         console.log('🚀 Text-to-Speech 已載入');
     </script>
-</body>
+    </body>
 </html>
